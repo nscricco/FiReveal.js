@@ -1,38 +1,41 @@
-var db = new Firebase('https://fireveal-js.firebaseio.com/')
-
 var Sync = {
-	addLocalListener: function() {
-		$(document).on('click', Sync.sendEvent)
-	},
-	removeLocalListener: function() {
-		$(document).off('click')
-	},
-	sendEvent: function(e) {
-		Reveal.removeEventListeners()
-
-		db.push(Sync.packageData(e))
-
-		Reveal.addEventListeners()
-	},
-	packageData: function(e) {
-		return {targetClass: e.target.className, type: e.type}
-	},
-	addCloudListener: function() {
-		db.limit(1).on('child_added', function(dataSnapshot) {
-			Sync.recceiveEvent(dataSnapshot.val())
-		})
-	},
-	recceiveEvent: function(eventData) {
-		Sync.removeLocalListener()
-
-		var targetElem = '.' + eventData.targetClass.replace('enabled', '')
-		$(targetElem).trigger(eventData.type)
+	init: function() {
+		this.db = new Firebase('https://fireveal-js.firebaseio.com/')
 
 		Sync.addLocalListener()
+		Sync.addCloudListener()
+
+		Sync.handleDisconnect()
+	},
+	addLocalListener: function() {
+		// Bind slide change events
+		$(document).on('click', Sync.sendURL)
+		$(document).on('keyup', Sync.sendURL)
+	},
+	sendURL: function() {
+		// Send location update
+		Sync.db.push(window.location.href)
+	},
+	addCloudListener: function() {
+		// Receive location update from database
+		Sync.db.limit(1).on('child_added', function(dataSnapshot) {
+			Sync.receiveURL(dataSnapshot.val())
+		})
+	},
+	receiveURL: function(data) {
+		window.location.href = data
+	},
+	handleDisconnect: function() {
+		// Clean database
+		Sync.db.onDisconnect().remove()
+
+		// Add current location if anybody is still connected
+		Sync.db.once('value', function() {
+			Sync.sendURL()
+		})
 	}
 }
 
 $(document).ready(function(){
-	Sync.addLocalListener()
-	Sync.addCloudListener()
+	Sync.init()
 })

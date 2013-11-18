@@ -57,7 +57,7 @@ var Reveal = (function(){
 			rtl: false,
 
 			// Turns fragments on and off globally
-			fragments: true,
+			fragments: false,
 
 			// Flags if the presentation is running in an embedded mode,
 			// i.e. contained within a limited portion of the screen
