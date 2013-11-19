@@ -9,7 +9,7 @@ var Sync = {
 	},
 	addLocalListener: function() {
 		// Bind slide change events
-		$(document).on('click', Sync.sendURL)
+		$(document).on('click touchstart', Sync.sendURL)
 		$(document).on('keyup', Sync.sendURL)
 	},
 	sendURL: function() {
